@@ -1,43 +1,47 @@
-const form = document.getElementById('userForm')
-const showDataButton = document.getElementById('showData')
-const userDataDiv = document.getElementById('userData')
+const form = document.getElementById('userForm');
+const showDataButton = document.getElementById('showData');
+const userDataDiv = document.getElementById('userData');
 
 form.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const name = document.getElementById('name');
-    const email = document.getElementById('email');
-    const age = document.getElementById('age');
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const age = document.getElementById('age').value.trim();
 
-    if (!form.checkValidity()) {
-        alert("Por favor completa los campos correctamente");
+    if (!name || !email || !age) {
+        alert('Por favor completa todos los campos');
         return;
     }
 
-    if (parseInt(age.value) <= 18) {
-    age.setCustomValidity("La edad debe ser mayor a 18 años.");
-    age.reportValidity();
-    return;
-  } else {
-    age.setCustomValidity("");
-  }
+    if (isNaN(age) || age < 18) {
+        alert('El usuario debe tener al menos 18 años');
+        return;
+    }
 
-  const userData = {
-    name: name.value,
-    email: email.value,
-    age: age.value
-  };
+    const user = { name, email, age };
 
-  localStorage.setItem('userData', JSON.stringify(userData));
-  alert('Datos guardados en localStorage');
-  form.reset();
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    users.push(user);
+    localStorage.setItem('users', JSON.stringify(users));
+
+    alert('Usuario guardado correctamente');
+    form.reset();
 });
 
-showDataBtn.addEventListener('click', () => {
-  const data = JSON.parse(localStorage.getItem('userData'));
-  if (data) {
-    userDataDiv.innerText = `Nombre: ${data.name}\nCorreo: ${data.email}\nEdad: ${data.age}`;
-  } else {
-    userDataDiv.innerText = 'No hay datos almacenados.';
-  }
+showDataButton.addEventListener('click', () => {
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if (users.length === 0) {
+        userDataDiv.innerHTML = '<p class="no-users">No hay usuarios guardados</p>';
+        return;
+    }
+
+    userDataDiv.innerHTML = users.map((u, i) =>
+        `<div class="user-card">
+            <h3> ${u.name}</h3>
+            <p> ${u.email}</p>
+            <p> ${u.age} años</p>
+        </div>`
+    ).join('');
 });
